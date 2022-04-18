@@ -19,7 +19,7 @@ st.set_page_config(
 client = MongoClient("mongodb+srv://jorgecantu33:cantu33@cistus.qmxcz.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
 database = client["Database"]
 db1 = database["Apartment Information"]
-db2 = database["Apartment Avg. Review Score"]
+db2 = database["Machine Learning Output"]
 
 cursor1 = db1.find()
 cursor2 = db2.find()
@@ -45,6 +45,7 @@ st.write("""
 # Assessment Realtors
 ##### Welcome, we are AssessmentRealtors.com 
 To begin please answer the questions on the sidebar located on the left side of the screen and set your aparment specifications.
+Or type the name of a specific apartment in the serch bar below.
 """)
 
 st.markdown("---")
@@ -77,8 +78,27 @@ Final = Final[Final['Distance to Texas A&M University (miles)'].astype(float) <=
 
 Final = Final.sort_values(by=['Average Review Score'],ascending=False)
 
+apartment_search = st.text_input("Enter the name of a apartment:", "")
+
+if apartment_search:
+    Monthly_Rent = int(df_3.loc[df_3["Name"] == apartment_search, "Monthly Rent"])
+
+    DistanceToCampus = float(df_3.loc[df_3["Name"] == apartment_search, "Distance to Texas A&M University (miles)"])
+
+    Address = df_3.loc[df_3["Name"].str.contains(apartment_search), "Location"].item()
+
+    AverageReviewScore = DistanceToCampus = float(df_3.loc[df_3["Name"] == apartment_search, "Average Review Score"])
+
+    st.write(f'The Apartment you have Chosen is: {apartment_search}.')
+    st.write(f'The Monthly Rent is ${Monthly_Rent} for {NumberofBedRooms} bathrooms and {NumberofBedRooms} bedrooms.')
+    st.write(f'The location of the apartment is {Address}, which is {DistanceToCampus} miles away from Texas A&M University.')
+    st.write(F'The Average Review Score for {apartment_search} is {AverageReviewScore} on a scale from 1 to 10.')
+
+st.markdown("---")
+
 if Final.empty:
-    st.write('Nothing has been selected.')
+    st.write('Nothing has been selected or there are no apartments that fall under those constraints.')
+
 else:
     st.dataframe(Final)
 
