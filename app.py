@@ -16,6 +16,7 @@ st.set_page_config(
 )
 
 client = MongoClient("mongodb+srv://jorgecantu33:cantu33@cistus.qmxcz.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+#heroku config:set client = ("mongodb+srv://jorgecantu33:cantu33@cistus.qmxcz.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
 database = client["Database"]
 db1 = database["Apartment Information"]
 db2 = database["Machine Learning Output"]
