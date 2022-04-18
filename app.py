@@ -7,16 +7,15 @@ import streamlit as st
 import pandas as pd
 from pandas import DataFrame
 import numpy as np
-import pymongo
-from pymongo import MongoClient
+#import pymongo
+#from pymongo import MongoClient
 import csv
 
 st.set_page_config(
     layout="wide"
 )
-
+#heroku config:set MONGODB_URI="mongodb+srv://jorgecantu33:cantu33@cistus.qmxcz.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
 client = MongoClient("mongodb+srv://jorgecantu33:cantu33@cistus.qmxcz.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
-#heroku config:set client = ("mongodb+srv://jorgecantu33:cantu33@cistus.qmxcz.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
 database = client["Database"]
 db1 = database["Apartment Information"]
 db2 = database["Machine Learning Output"]
