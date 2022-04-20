@@ -9,14 +9,14 @@ from pandas import DataFrame
 import numpy as np
 import pymongo
 from pymongo import MongoClient
-from pymongo import MONGODB_URI
 import csv
 
 st.set_page_config(
     layout="wide"
 )
+
 #heroku config:set MONGODB_URI="mongodb+srv://jorgecantu33:cantu33@cistus.qmxcz.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
-client = MONGODB_URI("mongodb+srv://jorgecantu33:cantu33@cistus.qmxcz.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+client = MongoClient("mongodb+srv://jorgecantu33:cantu33@cistus.qmxcz.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
 database = client["Database"]
 db1 = database["Apartment Information"]
 db2 = database["Machine Learning Output"]
