@@ -1,10 +1,6 @@
-from asyncio.windows_events import NULL
-from hashlib import new
 from http import client
-from tokenize import Name
 from typing import Final
 from unittest.util import strclass
-from wave import _wave_params
 from gridfs import Database
 from nbformat import write
 import streamlit as st
@@ -14,24 +10,13 @@ import numpy as np
 import pymongo
 from pymongo import MongoClient
 import csv
-import explode
-from decouple import config
 
 st.set_page_config(
     layout="wide"
 )
 
-hide_table_row_index = """
-            <style>
-            tbody th {display:none}
-            .blank {display:none}
-            </style>
-            """
-
-st.markdown(hide_table_row_index, unsafe_allow_html=True)
-
 #heroku config:set MONGODB_URI="mongodb+srv://jorgecantu33:cantu33@cistus.qmxcz.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
-client = MongoClient(config("MONGOCLIENT"))
+client = MongoClient("mongodb+srv://jorgecantu33:cantu33@cistus.qmxcz.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
 database = client["Database"]
 db1 = database["Apartment Information"]
 db2 = database["Machine Learning Output"]
@@ -67,7 +52,7 @@ st.markdown("---")
 
 st.sidebar.header('Apartment Specifications')
 
-Cost = float(st.sidebar.number_input (
+Cost = str(st.sidebar.number_input (
     "Enter the max Monthly Rent:", min_value=0, max_value=2000, step=50
 ))
 
@@ -85,53 +70,29 @@ Distance = float(st.sidebar.selectbox(
 
 df_3 = pd.merge(df_1, df_2, left_on='Name', right_on='Name', how='left')
 
-Final = df_3[df_3['Monthly Rent'].astype(float) <= Cost]
+Final = df_3[df_3['Monthly Rent'] <= Cost]
 
-Final = Final[Final['Number of Bedrooms/Bathrooms'] <= NumberofBedRooms]
+Final = Final[Final['Number of Bedrooms'] <= NumberofBedRooms]
 
 Final = Final[Final['Distance to Texas A&M University (miles)'].astype(float) <= Distance]
 
 Final = Final.sort_values(by=['Average Review Score'],ascending=False)
 
-#st.dataframe(df_3["Name"])
+apartment_search = st.text_input("Enter the name of a apartment:", "")
 
-apartment_search = st.text_input("Enter the name of a apartment (case sensative):", "")
-
-apartment_name = df_3['Name'].eq(apartment_search).any()
-
-if apartment_search == "":
-    st.write('')
-
-#elif not df_3['Name'].str.contains(apartment_search).any():
-elif apartment_name == False:
-    st.write('Apartment does not exist.')
-
-else:
-    Monthly_Rent = float(df_3.loc[df_3["Name"] == apartment_search, "Monthly Rent"])
+if apartment_search:
+    Monthly_Rent = int(df_3.loc[df_3["Name"] == apartment_search, "Monthly Rent"])
 
     DistanceToCampus = float(df_3.loc[df_3["Name"] == apartment_search, "Distance to Texas A&M University (miles)"])
 
-    Address = df_3.loc[df_3["Name"].str.contains(apartment_search), "Address"].item()
+    Address = df_3.loc[df_3["Name"].str.contains(apartment_search), "Location"].item()
 
-    AverageReviewScore = float(df_3.loc[df_3["Name"] == apartment_search, "Average Review Score"])
-
-    AverageReviewScore = str(round(AverageReviewScore, 2))
-
-    Pros = df_3.loc[df_3["Name"].str.contains(apartment_search), "Pro"].item()
-    Pros = Pros.split(",")
-
-    Cons = df_3.loc[df_3["Name"].str.contains(apartment_search), "Con"].item()
-    Cons = Cons.split(",")  
-
-    data = {'Pros':[Pros],'Cons': [Cons]}
-    PCTable = pd.DataFrame(data)
-    PCTable = PCTable.explode(['Pros','Cons'])
+    AverageReviewScore = DistanceToCampus = float(df_3.loc[df_3["Name"] == apartment_search, "Average Review Score"])
 
     st.write(f'The Apartment you have Chosen is: {apartment_search}.')
     st.write(f'The Monthly Rent is ${Monthly_Rent} for {NumberofBedRooms} bathrooms and {NumberofBedRooms} bedrooms.')
     st.write(f'The location of the apartment is {Address}, which is {DistanceToCampus} miles away from Texas A&M University.')
     st.write(F'The Average Review Score for {apartment_search} is {AverageReviewScore} on a scale from 1 to 10.')
-    st.table(PCTable)
 
 st.markdown("---")
 
@@ -139,36 +100,24 @@ if Final.empty:
     st.write('Nothing has been selected or there are no apartments that fall under those constraints.')
 
 else:
-    st.table(Final['Name'])
+    st.dataframe(Final)
 
     st.markdown("---")
 
     dropdown = st.selectbox('Pick your Apartment from the list above', Final["Name"])
 
-    Monthly_Rent = float(Final.loc[Final["Name"] == dropdown, "Monthly Rent"])
+    Monthly_Rent = int(Final.loc[Final["Name"] == dropdown, "Monthly Rent"])
 
     DistanceToCampus = float(Final.loc[Final["Name"] == dropdown, "Distance to Texas A&M University (miles)"])
 
-    Address = Final.loc[Final["Name"].str.contains(dropdown), "Address"].item()
+    Address = Final.loc[Final["Name"].str.contains(dropdown), "Location"].item()
 
-    AverageReviewScore = float(Final.loc[Final["Name"] == dropdown, "Average Review Score"])
-
-    AverageReviewScore = str(round(AverageReviewScore, 2))
-
-    Pros = Final.loc[Final["Name"].str.contains(dropdown), "Pro"].item()
-    Pros = Pros.split(",")
-
-    Cons = Final.loc[Final["Name"].str.contains(dropdown), "Con"].item()
-    Cons = Cons.split(",")  
-
-    data = {'Pros':[Pros],'Cons': [Cons]}
-    PCTable = pd.DataFrame(data)
-    PCTable = PCTable.explode(['Pros','Cons'])
+    AverageReviewScore = DistanceToCampus = float(Final.loc[Final["Name"] == dropdown, "Average Review Score"])
 
     st.write(f'The Apartment you have Chosen is: {dropdown}.')
     st.write(f'The Monthly Rent is ${Monthly_Rent} for {NumberofBedRooms} bathrooms and {NumberofBedRooms} bedrooms.')
     st.write(f'The location of the apartment is {Address}, which is {DistanceToCampus} miles away from Texas A&M University.')
     st.write(F'The Average Review Score for {dropdown} is {AverageReviewScore} on a scale from 1 to 10.')
-    st.table(PCTable)
+
 
 
