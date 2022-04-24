@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 from hashlib import new
 from http import client
 from tokenize import Name
@@ -14,8 +13,8 @@ import numpy as np
 import pymongo
 from pymongo import MongoClient
 import csv
-import explode
 from decouple import config
+import altair as alt
 
 st.set_page_config(
     layout="wide"
@@ -30,7 +29,6 @@ hide_table_row_index = """
 
 st.markdown(hide_table_row_index, unsafe_allow_html=True)
 
-#heroku config:set MONGODB_URI="mongodb+srv://jorgecantu33:cantu33@cistus.qmxcz.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
 client = MongoClient(config("MONGOCLIENT"))
 database = client["Database"]
 db1 = database["Apartment Information"]
@@ -133,6 +131,28 @@ else:
     st.write(F'The Average Review Score for {apartment_search} is {AverageReviewScore} on a scale from 1 to 10.')
     st.table(PCTable)
 
+    AllAverageReviewScores = df_3.loc[df_3["Name"] == apartment_search]
+
+    for i in range(6):
+        del AllAverageReviewScores[AllAverageReviewScores.columns.values[0]]
+
+    AllAverageReviewScores = AllAverageReviewScores.iloc[: , :-3]
+
+    AllAverageReviewScores = AllAverageReviewScores.T.stack().reset_index(name='val')
+
+    del AllAverageReviewScores["level_1"]
+
+    AllAverageReviewScores.rename(
+    columns={"level_0":"Date","val":"Average Review Score"} , inplace=True)
+
+    # generate a date range to be used as the x axis
+    AllAverageReviewScores['Date'] =  pd.date_range(start='2015-01-01', end='2022-04-01', periods=88)
+    df_melted = pd.melt(AllAverageReviewScores,id_vars=['Date'], value_name='Average Review Score')
+    c = alt.Chart(df_melted, title='Average Review Score Over Time').mark_line().encode(
+        x='Date', y='Average Review Score')
+
+    st.altair_chart(c, use_container_width=True)
+
 st.markdown("---")
 
 if Final.empty:
@@ -171,4 +191,24 @@ else:
     st.write(F'The Average Review Score for {dropdown} is {AverageReviewScore} on a scale from 1 to 10.')
     st.table(PCTable)
 
+    AllAverageReviewScores = Final.loc[Final["Name"] == dropdown]
 
+    for i in range(6):
+        del AllAverageReviewScores[AllAverageReviewScores.columns.values[0]]
+
+    AllAverageReviewScores = AllAverageReviewScores.iloc[: , :-3]
+
+    AllAverageReviewScores = AllAverageReviewScores.T.stack().reset_index(name='val')
+
+    del AllAverageReviewScores["level_1"]
+
+    AllAverageReviewScores.rename(
+    columns={"level_0":"Date","val":"Average Review Score"} , inplace=True)
+
+    # generate a date range to be used as the x axis
+    AllAverageReviewScores['Date'] =  pd.date_range(start='2015-01-01', end='2022-04-01', periods=88)
+    df_melted = pd.melt(AllAverageReviewScores,id_vars=['Date'], value_name='Average Review Score')
+    c = alt.Chart(df_melted, title='Average Review Score Over Time').mark_line().encode(
+        x='Date', y='Average Review Score')
+
+    st.altair_chart(c, use_container_width=True)
